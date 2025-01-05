@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.banner-img {
+    @apply w-full h-[200px] sm:h-[300px] md:h-[400px] lg:h-[500px] max-h-[90vh] object-cover mx-auto rounded-lg shadow-lg;
+  }
+  
+  

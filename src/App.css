@@ -1,0 +1,17 @@
+body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+  }
+  
+  .banner {
+    width: 100%;
+    position: relative;
+  }
+  
+  .banner-img {
+    width: 100%;
+    height: auto;
+    object-fit: cover; /* Ensure images scale without distortion */
+  }
+  
