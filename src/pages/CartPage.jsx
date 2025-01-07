@@ -1,5 +1,6 @@
 import React from "react";
 import { useCart } from "../context/CartContext";
+import { Link } from "react-router-dom"; // Import Link for navigation
 
 const CartPage = () => {
   const { cartItems, addToCart, decreaseQuantity, removeFromCart } = useCart();
@@ -64,6 +65,16 @@ const CartPage = () => {
             <h3 className="text-lg font-bold text-gray-700 text-right">
               Total Amount: ${totalAmount.toFixed(2)}
             </h3>
+          </div>
+
+          {/* Go to Checkout Button */}
+          <div className="mt-6 text-right">
+            <Link
+              to="/CheckoutPage"
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              Go to Checkout
+            </Link>
           </div>
         </div>
       )}

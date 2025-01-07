@@ -11,6 +11,7 @@ import { Routes, Route } from "react-router-dom";
 import { CartProvider } from "./context/CartContext"; // Import CartProvider
 import CartPage from "./pages/CartPage";
 import ProductPage from "./pages/ProductPage";
+import CheckoutPage from "./pages/CheckoutPage";
 import "./App.css"
 
 const App = () => {
@@ -36,6 +37,7 @@ const App = () => {
             <Route path="/kids" element={<Kids />} /> {/* Kids page */}
             <Route path="/CartPage" element={<CartPage />} />
             <Route path="/ProductPage/:id" element={<ProductPage />} />
+            <Route path="/CheckoutPage" element={<CheckoutPage />} /> {/* Route for CheckoutPage */}
           </Routes>
         </div>
         <footer className="bg-gray-100 text-center py-4">

@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShoppingCart, faSignInAlt, faUserPlus } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
-import SearchBar from "./SearchBar"; // Import the SearchBar component
+import SearchBar from "./SearchBar";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,7 +21,6 @@ const Navbar = () => {
 
           {/* Menu (Desktop) */}
           <div className="hidden md:flex space-x-6">
-
             <a href="/Men" className="text-gray-700 hover:text-blue-500">
               Men
             </a>
@@ -31,7 +30,7 @@ const Navbar = () => {
             <a href="/Kids" className="text-gray-700 hover:text-blue-500">
               Kids
             </a>
-            <a href="/Footware" className="text-gray-700 hover:text-blue-500">
+            <a href="/Footwear" className="text-gray-700 hover:text-blue-500">
               Footwear
             </a>
             <a href="/Accessories" className="text-gray-700 hover:text-blue-500">
@@ -95,6 +94,39 @@ const Navbar = () => {
             </button>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        {isOpen && (
+          <div className="md:hidden bg-gray-100">
+            <div className="space-y-2 py-4 px-4">
+              <a href="/Men" className="block text-gray-700 hover:text-blue-500">
+                Men
+              </a>
+              <a href="/Women" className="block text-gray-700 hover:text-blue-500">
+                Women
+              </a>
+              <a href="/Kids" className="block text-gray-700 hover:text-blue-500">
+                Kids
+              </a>
+              <a href="/Footwear" className="block text-gray-700 hover:text-blue-500">
+                Footwear
+              </a>
+              <a href="/Accessories" className="block text-gray-700 hover:text-blue-500">
+                Accessories
+              </a>
+              <hr className="my-2" />
+              <Link to="/CartPage" className="block text-gray-700 hover:text-blue-500">
+                Cart
+              </Link>
+              <a href="/Login" className="block text-gray-700 hover:text-blue-500">
+                Login
+              </a>
+              <a href="/Signup" className="block text-gray-700 hover:text-blue-500">
+                Signup
+              </a>
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );
