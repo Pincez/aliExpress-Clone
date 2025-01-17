@@ -24,11 +24,14 @@ const CartPage = () => {
                 key={item.id}
                 className="flex items-center justify-between border-b pb-4"
               >
+                {/* Product Image */}
                 <img
                   src={item.image}
                   alt={item.name}
                   className="w-16 h-16 object-cover"
                 />
+
+                {/* Product Details */}
                 <div className="flex-1 px-4">
                   <h4 className="text-lg font-semibold">{item.name}</h4>
                   <p className="text-gray-500">
@@ -50,6 +53,8 @@ const CartPage = () => {
                     </button>
                   </div>
                 </div>
+
+                {/* Remove Button */}
                 <button
                   onClick={() => removeFromCart(item.id)}
                   className="text-red-500 hover:underline"

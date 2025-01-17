@@ -1,20 +1,85 @@
-import React from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { auth, db } from "../firebase/firebase"; // Adjust the import path based on your structure
+import { doc, setDoc } from "firebase/firestore"; // Firestore imports
 
 const Signup = () => {
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setFormData({ ...formData, [id]: value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
+      );
+      const user = userCredential.user;
+
+      // Update the user's profile with their full name
+      await updateProfile(user, {
+        displayName: formData.fullName,
+      });
+
+      // Save user data to Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        fullName: formData.fullName,
+        email: user.email,
+        createdAt: new Date(),
+      });
+
+      console.log("User signed up:", user);
+      setSuccess("Signup successful! Redirecting to login...");
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
+    } catch (err) {
+      console.error("Error signing up:", err.message);
+      setError(err.message);
+    }
+  };
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white shadow-md rounded-lg p-8 w-full max-w-md">
         <h2 className="text-2xl font-bold text-center text-blue-500 mb-6">Sign Up</h2>
-        <form>
+        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+        {success && <p className="text-green-500 text-center mb-4">{success}</p>}
+        <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="fullName">
               Full Name
             </label>
             <input
               type="text"
-              id="name"
+              id="fullName"
               placeholder="Enter your full name"
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={formData.fullName}
+              onChange={handleChange}
+              required
             />
           </div>
           <div className="mb-4">
@@ -26,6 +91,9 @@ const Signup = () => {
               id="email"
               placeholder="Enter your email"
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={formData.email}
+              onChange={handleChange}
+              required
             />
           </div>
           <div className="mb-4">
@@ -37,17 +105,23 @@ const Signup = () => {
               id="password"
               placeholder="Create a password"
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={formData.password}
+              onChange={handleChange}
+              required
             />
           </div>
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="confirm-password">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="confirmPassword">
               Confirm Password
             </label>
             <input
               type="password"
-              id="confirm-password"
+              id="confirmPassword"
               placeholder="Confirm your password"
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
             />
           </div>
           <button

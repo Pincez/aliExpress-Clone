@@ -1,49 +1,64 @@
-import React, { useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faShoppingCart, faSignInAlt, faUserPlus } from "@fortawesome/free-solid-svg-icons";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
 import { useCart } from "../context/CartContext";
-import SearchBar from "./SearchBar";
+import { auth } from "../firebase/firebase"; // Import Firebase Auth
+import { signOut } from "firebase/auth";
 
 const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const { cartCount } = useCart();
+  const { cartCount, setCartItems } = useCart(); // Add `setCartItems` for clearing cart
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+      setUser(currentUser);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setCartItems([]); // Clear cart items on logout
+      console.log("User signed out successfully");
+    } catch (error) {
+      console.error("Sign-out error:", error);
+    }
+  };
 
   return (
     <nav className="bg-white shadow-md">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
+          {/* Logo */}
           <div className="flex-shrink-0">
-            <a href="/" className="text-2xl font-bold text-blue-500">
+            <Link to="/" className="text-2xl font-bold text-blue-500">
               Logo
-            </a>
+            </Link>
           </div>
 
-          {/* Menu (Desktop) */}
+          {/* Navigation Links */}
           <div className="hidden md:flex space-x-6">
-            <a href="/Men" className="text-gray-700 hover:text-blue-500">
+            <Link to="/Men" className="text-gray-700 hover:text-blue-500">
               Men
-            </a>
-            <a href="/Women" className="text-gray-700 hover:text-blue-500">
+            </Link>
+            <Link to="/Women" className="text-gray-700 hover:text-blue-500">
               Women
-            </a>
-            <a href="/Kids" className="text-gray-700 hover:text-blue-500">
+            </Link>
+            <Link to="/Kids" className="text-gray-700 hover:text-blue-500">
               Kids
-            </a>
-            <a href="/Footwear" className="text-gray-700 hover:text-blue-500">
+            </Link>
+            <Link to="/Footwear" className="text-gray-700 hover:text-blue-500">
               Footwear
-            </a>
-            <a href="/Accessories" className="text-gray-700 hover:text-blue-500">
+            </Link>
+            <Link to="/Accessories" className="text-gray-700 hover:text-blue-500">
               Accessories
-            </a>
+            </Link>
           </div>
 
-          {/* Search Bar */}
-          <div className="hidden md:block w-64">
-            <SearchBar />
-          </div>
-
-          {/* Icons */}
+          {/* Right Section: Cart and User Actions */}
           <div className="hidden md:flex space-x-4 items-center">
             {/* Cart Icon */}
             <Link to="/CartPage" className="relative text-gray-700 hover:text-blue-500">
@@ -54,79 +69,28 @@ const Navbar = () => {
                 </span>
               )}
             </Link>
-            <a href="/Login" className="text-gray-700 hover:text-blue-500">
-              <FontAwesomeIcon icon={faSignInAlt} size="lg" />
-            </a>
-            <a href="/Signup" className="text-gray-700 hover:text-blue-500">
-              <FontAwesomeIcon icon={faUserPlus} size="lg" />
-            </a>
-          </div>
 
-          {/* Hamburger Icon (Mobile) */}
-          <div className="md:hidden flex items-center">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="text-gray-700 hover:text-blue-500 focus:outline-none"
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
+            {/* User Actions */}
+            {user ? (
+              <div className="flex items-center space-x-4">
+                <span className="text-gray-700">Hello, {user.displayName || user.email}</span>
+                <button
+                  onClick={handleLogout}
+                  className="bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <Link
+                to="/login"
+                className="bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600"
               >
-                {isOpen ? (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                ) : (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16m-7 6h7"
-                  />
-                )}
-              </svg>
-            </button>
+                Login/Signup
+              </Link>
+            )}
           </div>
         </div>
-
-        {/* Mobile Menu */}
-        {isOpen && (
-          <div className="md:hidden bg-gray-100">
-            <div className="space-y-2 py-4 px-4">
-              <a href="/Men" className="block text-gray-700 hover:text-blue-500">
-                Men
-              </a>
-              <a href="/Women" className="block text-gray-700 hover:text-blue-500">
-                Women
-              </a>
-              <a href="/Kids" className="block text-gray-700 hover:text-blue-500">
-                Kids
-              </a>
-              <a href="/Footwear" className="block text-gray-700 hover:text-blue-500">
-                Footwear
-              </a>
-              <a href="/Accessories" className="block text-gray-700 hover:text-blue-500">
-                Accessories
-              </a>
-              <hr className="my-2" />
-              <Link to="/CartPage" className="block text-gray-700 hover:text-blue-500">
-                Cart
-              </Link>
-              <a href="/Login" className="block text-gray-700 hover:text-blue-500">
-                Login
-              </a>
-              <a href="/Signup" className="block text-gray-700 hover:text-blue-500">
-                Signup
-              </a>
-            </div>
-          </div>
-        )}
       </div>
     </nav>
   );

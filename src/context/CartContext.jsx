@@ -1,4 +1,5 @@
-import React, { createContext, useState, useContext } from "react";
+import React, { createContext, useState, useContext, useEffect } from "react";
+import { auth } from "../firebase/firebase"; // Import Firebase Auth
 
 // Create the context
 const CartContext = createContext();
@@ -9,6 +10,32 @@ export const useCart = () => useContext(CartContext);
 // Cart context provider
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
+  const [user, setUser] = useState(null);
+
+  // Load cart from localStorage or user-specific storage on component mount
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+      setUser(currentUser);
+
+      if (currentUser) {
+        // Load user-specific cart
+        const storedCart = JSON.parse(localStorage.getItem(`cart_${currentUser.uid}`)) || [];
+        setCartItems(storedCart);
+      } else {
+        // Clear cart on logout
+        setCartItems([]);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Save cart to user-specific storage whenever it changes
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem(`cart_${user.uid}`, JSON.stringify(cartItems));
+    }
+  }, [cartItems, user]);
 
   // Add item to the cart or update its quantity
   const addToCart = (product) => {
@@ -54,7 +81,13 @@ export const CartProvider = ({ children }) => {
 
   return (
     <CartContext.Provider
-      value={{ cartItems, addToCart, removeFromCart, decreaseQuantity, cartCount }}
+      value={{
+        cartItems,
+        addToCart,
+        removeFromCart,
+        decreaseQuantity,
+        cartCount,
+      }}
     >
       {children}
     </CartContext.Provider>
