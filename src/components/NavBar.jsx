@@ -61,7 +61,7 @@ const Navbar = () => {
           {/* Right Section: Cart and User Actions */}
           <div className="hidden md:flex space-x-4 items-center">
             {/* Cart Icon */}
-            <Link to="/CartPage" className="relative text-gray-700 hover:text-blue-500">
+            <Link to="/cart" className="relative text-gray-700 hover:text-blue-500">
               <FontAwesomeIcon icon={faShoppingCart} size="lg" />
               {cartCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-red-500 text-white text-sm rounded-full w-5 h-5 flex items-center justify-center">

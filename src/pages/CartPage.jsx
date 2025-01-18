@@ -1,11 +1,10 @@
 import React from "react";
 import { useCart } from "../context/CartContext";
-import { Link } from "react-router-dom"; // Import Link for navigation
+import { Link } from "react-router-dom";
 
 const CartPage = () => {
   const { cartItems, addToCart, decreaseQuantity, removeFromCart } = useCart();
 
-  // Calculate the total amount
   const totalAmount = cartItems.reduce(
     (total, item) => total + item.quantity * item.new_price,
     0
@@ -24,14 +23,12 @@ const CartPage = () => {
                 key={item.id}
                 className="flex items-center justify-between border-b pb-4"
               >
-                {/* Product Image */}
                 <img
                   src={item.image}
                   alt={item.name}
                   className="w-16 h-16 object-cover"
                 />
 
-                {/* Product Details */}
                 <div className="flex-1 px-4">
                   <h4 className="text-lg font-semibold">{item.name}</h4>
                   <p className="text-gray-500">
@@ -54,7 +51,6 @@ const CartPage = () => {
                   </div>
                 </div>
 
-                {/* Remove Button */}
                 <button
                   onClick={() => removeFromCart(item.id)}
                   className="text-red-500 hover:underline"
@@ -65,17 +61,15 @@ const CartPage = () => {
             ))}
           </ul>
 
-          {/* Total Amount Section */}
           <div className="mt-6 border-t pt-4">
             <h3 className="text-lg font-bold text-gray-700 text-right">
               Total Amount: ${totalAmount.toFixed(2)}
             </h3>
           </div>
 
-          {/* Go to Checkout Button */}
           <div className="mt-6 text-right">
             <Link
-              to="/CheckoutPage"
+              to="/checkout" // Update to match route definition in App.js
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
             >
               Go to Checkout

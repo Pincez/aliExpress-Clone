@@ -75,7 +75,7 @@ const App = () => {
           </div>
           <footer className="bg-gray-100 text-center py-4">
             <p className="text-gray-600 text-sm">
-              &copy; {new Date().getFullYear()} Your Company. All rights reserved.
+              &copy; {new Date().getFullYear()} Pincez.inc. All rights reserved.
             </p>
           </footer>
         </div>
