@@ -1,32 +1,45 @@
-import React from "react";
-import Card from "./Card";
+import React, { useState } from "react";
+import Banner from "../components/Banner";
+import NewProductsSlider from "../components/NewProductsSlider";
 import all_product from "../assets/Frontend_Assets/all_product"; // Import the data
 
-const CardGrid = ({ category }) => {
-  // Filter products based on category if provided, otherwise show all
-  const filteredProducts = category
-    ? all_product.filter((product) => product.category === category)
-    : all_product;
+const Homepage = () => {
+  const [isTooltipOpen, setIsTooltipOpen] = useState(false);
+
+  // Close tooltip when clicking outside
+  const handleClickOutside = (event) => {
+    if (!event.target.closest(".tooltip-container") && !event.target.closest(".menu-button")) {
+      setIsTooltipOpen(false);
+    }
+  };
+
+  React.useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h2 className="text-2xl font-bold text-gray-700 text-center mb-6">
-        Featured Products
-      </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {filteredProducts.map((product) => (
-          <Card
-            key={product.id}
-            image={product.image}
-            title={product.name}
-            description={product.category}
-            price={product.new_price}
-            product={product} // Pass the product object to the Card
-          />
-        ))}
+    <div className="flex flex-col h-screen bg-gray-100 overflow-hidden">
+      {/* Main Content Area */}
+      <div className="flex flex-col flex-grow overflow-hidden relative">
+        {/* Banner Section */}
+        <div className="w-full">
+          <div className="p-6">
+            <div className="h-64"> {/* Fixed height for Banner */}
+              <Banner />
+            </div>
+          </div>
+        </div>
+
+        {/* New Products Slider Section */}
+        <div className="flex-1 p-6 overflow-y-auto" style={{ overflowX: "hidden", marginTop: "0" }}>
+          <NewProductsSlider products={all_product} />
+        </div>
       </div>
     </div>
   );
 };
 
-export default CardGrid;
+export default Homepage;

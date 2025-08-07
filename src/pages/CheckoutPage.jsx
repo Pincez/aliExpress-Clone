@@ -1,114 +1,186 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
+import axios from "axios";
 
 const CheckoutPage = () => {
-  const [deliveryAddress, setDeliveryAddress] = useState("");
-  const [selectedPayment, setSelectedPayment] = useState("");
-  const itemsPrice = 100; // Example item price
-  const shippingPrice = 10; // Example shipping price
-  const taxPrice = itemsPrice * 0.15; // Example tax (15% of items price)
-  const [coupon, setCoupon] = useState("");
-  const couponDiscount = coupon === "SAVE10" ? 10 : 0; // Example coupon logic
-  const totalCost = itemsPrice + shippingPrice + taxPrice - couponDiscount;
+  const { cart, clearCart, loading, error } = useCart();
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
-  const handlePayment = (method) => {
-    if (method === "paypal") {
-      alert("Redirecting to PayPal...");
-      // Integrate PayPal SDK functionality here
-    } else if (method === "googlepay") {
-      alert("Processing Google Pay...");
-      // Integrate Google Pay API here
-    } else if (method === "mpesa") {
-      alert("Processing M-Pesa payment...");
-      // Integrate M-Pesa functionality here
+  const [phone, setPhone] = useState("");
+
+  const [town, setTown] = useState("");
+
+  const [addressDetails, setAddressDetails] = useState("");
+
+  const [paymentMethod, setPaymentMethod] = useState("mpesa");
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [paymentError, setPaymentError] = useState("");
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+
+  const DELIVERY_FEE = 150;
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/login?redirect=checkout");
+    }
+  }, [user, navigate]);
+
+  const handlePayment = async () => {
+    setPaymentLoading(true);
+    setPaymentError("");
+    try {
+      const res = await axios.post(`/api/payments/${paymentMethod}`, {
+        phone,
+        amount: cart.total + DELIVERY_FEE,
+      });
+
+      if (res.data.success) {
+        setPaymentSuccess(true);
+        alert("Payment initiated. Follow the instructions on your device.");
+      } else {
+        throw new Error(res.data.message || "Payment initiation failed");
+      }
+    } catch (err) {
+      console.error(err);
+      setPaymentError("Failed to initiate payment. Try again.");
+    } finally {
+      setPaymentLoading(false);
     }
   };
 
-  return (
-    <div className="container mx-auto px-4 py-8 flex justify-center items-start space-x-8">
-      {/* First Card: Delivery Address and Payment Methods */}
-      <div className="w-1/2 bg-white shadow-md rounded-lg p-6">
-        <h2 className="text-xl font-bold text-gray-700 mb-4">Delivery Address</h2>
-        <textarea
-          value={deliveryAddress}
-          onChange={(e) => setDeliveryAddress(e.target.value)}
-          placeholder="Enter your delivery address"
-          className="w-full p-2 border rounded mb-4"
-          rows={4}
-        ></textarea>
+  const handlePlaceOrder = async () => {
+    try {
+      if (!paymentSuccess) {
+        alert("Please complete payment before placing the order.");
+        return;
+      }
 
-        <h3 className="text-lg font-bold text-gray-700 mb-4">Payment Methods</h3>
-        <div className="space-y-4">
-          <button
-            onClick={() => handlePayment("paypal")}
-            className={`w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 ${
-              selectedPayment === "paypal" && "ring ring-blue-300"
-            }`}
-          >
-            Pay with PayPal
-          </button>
-          <button
-            onClick={() => handlePayment("googlepay")}
-            className={`w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 ${
-              selectedPayment === "googlepay" && "ring ring-green-300"
-            }`}
-          >
-            Pay with Google Pay
-          </button>
-          <button
-            onClick={() => handlePayment("mpesa")}
-            className={`w-full px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-900 ${
-              selectedPayment === "mpesa" && "ring ring-gray-300"
-            }`}
-          >
-            Pay with M-Pesa
-          </button>
+      await axios.post("/api/orders", {
+        userId: user._id,
+        cart: cart.items,
+        total: cart.total + DELIVERY_FEE,
+        phone,
+        town,
+        addressDetails,
+        paymentMethod,
+      });
+
+      alert("Order placed successfully!");
+      await clearCart();
+      navigate("/thank-you");
+    } catch (err) {
+      console.error("Order placement error:", err);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!cart || cart.items.length === 0) {
+    return (
+      <div className="container mx-auto px-4 py-10">
+        <div className="bg-blue-100 text-blue-800 p-4 rounded text-center">
+          Your cart is empty.
         </div>
       </div>
+    );
+  }
 
-      {/* Second Card: Cost Calculation */}
-      <div className="w-1/3 bg-white shadow-md rounded-lg p-6">
-        <h2 className="text-xl font-bold text-gray-700 mb-4">Order Summary</h2>
-        <ul className="space-y-2">
-          <li className="flex justify-between">
-            <span>Items Price:</span>
-            <span>${itemsPrice.toFixed(2)}</span>
+  return (
+    <div className="container mx-auto px-4 py-10 grid md:grid-cols-2 gap-8">
+      {/* Order Summary */}
+      <div className="bg-white shadow p-6 rounded-lg">
+        <h3 className="text-xl font-semibold mb-4 text-gray-800">Order Summary</h3>
+        <ul className="divide-y">
+          {cart.items.map((item) => (
+            <li key={item._id} className="flex justify-between py-2">
+              <span>{item.name} × {item.quantity}</span>
+              <span>${(item.price * item.quantity).toFixed(2)}</span>
+            </li>
+          ))}
+          <li className="flex justify-between font-medium py-2">
+            <span>Subtotal</span>
+            <span>${cart.total.toFixed(2)}</span>
           </li>
-          <li className="flex justify-between">
-            <span>Shipping Price:</span>
-            <span>${shippingPrice.toFixed(2)}</span>
+          <li className="flex justify-between font-medium py-2">
+            <span>Delivery Fee</span>
+            <span>${DELIVERY_FEE.toFixed(2)}</span>
           </li>
-          <li className="flex justify-between">
-            <span>Tax (15%):</span>
-            <span>${taxPrice.toFixed(2)}</span>
-          </li>
-          <li className="flex justify-between">
-            <span>Coupon Discount:</span>
-            <span>-${couponDiscount.toFixed(2)}</span>
+          <li className="flex justify-between font-bold py-2 border-t pt-2">
+            <span>Total</span>
+            <span>${(cart.total + DELIVERY_FEE).toFixed(2)}</span>
           </li>
         </ul>
+      </div>
 
-        <div className="mt-4">
-          <input
-            type="text"
-            value={coupon}
-            onChange={(e) => setCoupon(e.target.value)}
-            placeholder="Apply coupon code"
-            className="w-full p-2 border rounded mb-2"
-          />
-        </div>
+      {/* Payment & Address */}
+      <div className="bg-white shadow p-6 rounded-lg">
+        <h3 className="text-xl font-semibold mb-4 text-gray-800">Delivery Info & Payment</h3>
 
-        <hr className="my-4" />
+        <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+        <input
+          type="tel"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          placeholder="e.g. 07XXXXXXXX"
+          className="w-full px-4 py-2 border border-gray-300 rounded mb-4"
+        />
 
-        <div className="flex justify-between text-lg font-bold">
-          <span>Total Cost:</span>
-          <span>${totalCost.toFixed(2)}</span>
-        </div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Nearby Town</label>
+        <input
+          type="text"
+          value={town}
+          onChange={(e) => setTown(e.target.value)}
+          placeholder="e.g. Oyugis"
+          className="w-full px-4 py-2 border border-gray-300 rounded mb-4"
+        />
+
+        <label className="block text-sm font-medium text-gray-700 mb-1">Exact Location</label>
+        <textarea
+          value={addressDetails}
+          onChange={(e) => setAddressDetails(e.target.value)}
+          placeholder="e.g. Oyugis Boys gate or market near Nyamira junction"
+          rows="3"
+          className="w-full px-4 py-2 border border-gray-300 rounded mb-4"
+        />
+
+        <label className="block text-sm font-medium text-gray-700 mb-1">Payment Method</label>
+        <select
+          value={paymentMethod}
+          onChange={(e) => setPaymentMethod(e.target.value)}
+          className="w-full px-4 py-2 border border-gray-300 rounded mb-4"
+        >
+          <option value="mpesa">M-Pesa</option>
+          <option value="airtel">Airtel Money</option>
+          <option value="paypal">PayPal</option>
+          <option value="skrill">Skrill</option>
+        </select>
 
         <button
-          onClick={() => alert("Order placed successfully!")}
-          className="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          onClick={handlePayment}
+          disabled={paymentLoading || !phone}
+          className="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded disabled:opacity-50"
         >
-          Place Order
+          {paymentLoading ? "Processing..." : `Pay with ${paymentMethod.charAt(0).toUpperCase() + paymentMethod.slice(1)}`}
+        </button>
+
+        {paymentError && <p className="text-red-600 mt-2">{paymentError}</p>}
+        {paymentSuccess && <p className="text-green-600 mt-2">Payment success. Proceed to place your order.</p>}
+
+        <button
+          onClick={handlePlaceOrder}
+          disabled={loading || !paymentSuccess}
+          className="mt-6 w-full bg-green-600 text-white px-6 py-3 rounded hover:bg-green-700 disabled:opacity-50"
+        >
+          {loading ? "Placing Order..." : "Place Order"}
         </button>
       </div>
     </div>

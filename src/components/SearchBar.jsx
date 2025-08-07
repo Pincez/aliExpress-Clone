@@ -1,7 +1,6 @@
 // components/SearchBar.jsx
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import all_product from "../assets/Frontend_Assets/all_product"; // Import the product data
 
 const SearchBar = () => {
   const [query, setQuery] = useState("");

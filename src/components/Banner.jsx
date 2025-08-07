@@ -8,13 +8,13 @@ import banner_women from "../assets/Frontend_Assets/banner_women.png";
 
 const Banner = () => {
   const settings = {
-    dots: true, // Enable dots for navigation
-    infinite: true, // Infinite scrolling
-    speed: 500, // Transition speed
-    slidesToShow: 1, // Number of slides visible
-    slidesToScroll: 1, // Number of slides to scroll
-    autoplay: true, // Enable auto-scroll
-    autoplaySpeed: 3000, // Auto-scroll interval
+    dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 3000,
   };
 
   const images = [
@@ -24,14 +24,14 @@ const Banner = () => {
   ];
 
   return (
-    <div className="banner w-full overflow-hidden">
-      <Slider {...settings}>
+    <div className="banner w-full "> {/* Match sidebar height */}
+      <Slider {...settings} className="w-full h-full">
         {images.map((item, id) => (
-          <div key={id} className="relative">
+          <div key={id} className="w-full h-full flex justify-center items-center">
             <img
               src={item.image}
               alt={`Slide ${id + 1}`}
-              className="w-full h-auto object-cover" // Ensure responsive images
+              className="w-full h-full object-cover" // Fills the space properly
             />
           </div>
         ))}

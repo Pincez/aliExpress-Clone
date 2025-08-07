@@ -1,190 +1,264 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
-import { db, auth } from "../firebase/firebase"; // Ensure auth is imported
-import { collection, addDoc, query, where, getDocs, getDoc, doc } from "firebase/firestore";
-import SuggestedProducts from "../components/SuggestedProducts";
-import all_product from "../assets/Frontend_Assets/all_product";
+import { useAuth } from "../context/AuthContext";
+import axios from "axios";
 
-const ProductPage = ({ product }) => {
+const ProductPage = () => {
+  const { _id } = useParams();
   const { addToCart } = useCart();
-  const [rating, setRating] = useState(0);
-  const [hover, setHover] = useState(0);
-  const [comments, setComments] = useState([]);
+  const { user } = useAuth();
+  const [product, setProduct] = useState(null);
+  const [suggestedProducts, setSuggestedProducts] = useState([]);
+  const [reviews, setReviews] = useState([]);
+  const [newRating, setNewRating] = useState(0);
   const [newComment, setNewComment] = useState("");
-  const [user, setUser] = useState(null);
-  const [userFullName, setUserFullName] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [adding, setAdding] = useState(false);
+  const [error, setError] = useState("");
 
-  // Firestore collection reference
-  const commentsCollectionRef = collection(db, "productInteractions");
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const res = await axios.get(`/api/products/${_id}`);
+        setProduct(res.data.data);
 
-  // Fetch comments from Firestore
-  const fetchComments = async () => {
+        const suggestedRes = await axios.get(
+          `/api/products?category=${res.data.data.category}&limit=4`
+        );
+        setSuggestedProducts(
+          suggestedRes.data.data.filter((p) => p._id !== _id)
+        );
+      } catch (err) {
+        console.error("Products fetch failed", err);
+        setError("Failed to load products.");
+      }
+    };
+
+    const fetchReviews = async () => {
+      try {
+        const res = await axios.get(`/api/products/${_id}/interactions`);
+        setReviews(res.data.data || []);
+      } catch (err) {
+        console.error("Failed to fetch reviews", err);
+      }
+    };
+
+    fetchProduct();
+    fetchReviews();
+  }, [_id]);
+
+  const handleAddToCart = async (productToAdd, quantity = 1) => {
+    setAdding(true);
     try {
-      const q = query(commentsCollectionRef, where("productId", "==", product.id));
-      const querySnapshot = await getDocs(q);
-      const fetchedComments = querySnapshot.docs.map((doc) => doc.data());
-      setComments(fetchedComments);
-    } catch (error) {
-      console.error("Error fetching comments:", error);
+      const success = await addToCart(productToAdd, quantity);
+      if (!success) setError("Failed to add to cart.");
+    } catch (err) {
+      setError("Error adding to cart.");
+    } finally {
+      setAdding(false);
     }
   };
 
-  // Fetch authenticated user details
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-        // Fetch user's full name from Firestore
-        const userDocRef = doc(db, "users", currentUser.uid); // Assuming users are stored in the "users" collection
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) {
-          setUserFullName(userDoc.data().fullName);
-        }
-      } else {
-        setUser(null);
-        setUserFullName("");
-      }
-    });
-    return () => unsubscribe();
-  }, []);
-
-  // Submit a new comment to Firestore
-  const handleCommentSubmit = async (e) => {
+  const handleReviewSubmit = async (e) => {
     e.preventDefault();
-    if (!user) {
-      alert("You must be logged in to post a comment.");
+    if (newRating === 0) {
+      alert("Please select a rating.");
       return;
     }
-    if (newComment.trim() && rating > 0) {
-      const commentData = {
-        productId: product.id,
-        comment: newComment,
-        rating,
-        timestamp: new Date(),
-        userName: userFullName || "Anonymous User", // Use fullName or fallback
-      };
 
-      try {
-        await addDoc(commentsCollectionRef, commentData);
-        setComments([...comments, commentData]);
-        setNewComment("");
-        setRating(0);
-      } catch (error) {
-        console.error("Error adding comment:", error);
-      }
-    } else {
-      alert("Please provide a valid comment and rating.");
+    setSubmittingReview(true);
+
+    const newReview = {
+      rating: newRating,
+      comment: newComment,
+      userName: user?.name || "Anonymous",
+      _id: "temp-id",
+    };
+
+    setReviews((prev) => [newReview, ...prev]);
+
+    try {
+      const res = await axios.post(`/api/products/${_id}/interactions`, {
+        rating: newRating,
+        comment: newComment,
+        userName: user?.name || "Anonymous",
+      });
+
+      const realId = res.data.data._id;
+
+      setReviews((prevReviews) =>
+        prevReviews.map((review) =>
+          review._id === "temp-id" ? { ...review, _id: realId } : review
+        )
+      );
+
+      setNewRating(0);
+      setNewComment("");
+    } catch (err) {
+      console.error("Review submit failed", err);
+      alert("Failed to submit review.");
+      setReviews((prevReviews) =>
+        prevReviews.filter((review) => review._id !== "temp-id")
+      );
+    } finally {
+      setSubmittingReview(false);
     }
   };
 
-  useEffect(() => {
-    if (product) {
-      fetchComments();
-    }
-  }, [product]);
-
-  // Suggested products logic
-  const suggestedProducts = all_product
-    .filter((item) => item.category === product.category && item.id !== product.id)
-    .slice(0, 4);
-
-  if (!product) {
-    return (
-      <div className="container mx-auto px-4 py-8 text-center">
-        <p className="text-gray-500">Product not found.</p>
-        <Link to="/" className="text-blue-500 hover:underline">
-          Go back to Home
-        </Link>
-      </div>
-    );
-  }
+  if (error) return <div className="p-4 text-red-500">{error}</div>;
+  if (!product) return <div className="p-4">Loading...</div>;
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col md:flex-row gap-8">
-        {/* Product Image */}
-        <img
-          src={product.image}
-          alt={product.name}
-          className="w-full md:w-1/2 object-cover rounded-lg"
-        />
-
-        {/* Product Details */}
+    <div className="max-w-6xl mx-auto p-6">
+      {/* Product Section */}
+      <div className="flex flex-col md:flex-row gap-6 mb-12">
         <div className="flex-1">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">{product.name}</h2>
-          <p className="text-lg text-gray-700 mb-4">${product.new_price.toFixed(2)}</p>
-          <p className="text-sm text-gray-500 mb-6">{product.description}</p>
+          <img
+            src={
+              product.image ||
+              "https://via.placeholder.com/300x300?text=Image+Not+Available"
+            }
+            alt={product.name}
+            className="w-full object-contain max-h-[400px] bg-gray-100 p-4 rounded-lg"
+          />
+        </div>
+        <div className="flex-1">
+          <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
+          <p className="text-gray-700 mb-6 text-lg">{product.description}</p>
+          <p className="text-2xl font-semibold text-blue-600 mb-6">
+            ${product.price?.toFixed(2)}
+          </p>
 
-          {/* Rating Section */}
-          <div className="mb-4">
-            <h4 className="text-lg font-medium text-gray-800 mb-2">Rate this product:</h4>
-            <div className="flex">
+          {product.rating && (
+            <div className="mb-6 flex items-center">
+              {[...Array(5)].map((_, i) => (
+                <svg
+                  key={i}
+                  className={`w-6 h-6 ${
+                    i < Math.floor(product.rating)
+                      ? "text-yellow-400"
+                      : "text-gray-300"
+                  }`}
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+              ))}
+              <span className="text-sm text-gray-600 ml-2">
+                ({product.rating.toFixed(1)})
+              </span>
+            </div>
+          )}
+
+          <button
+            onClick={() => handleAddToCart(product)}
+            className={`mt-6 px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-lg font-medium ${
+              adding ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+            disabled={adding}
+          >
+            {adding ? "Adding..." : "Add to Cart"}
+          </button>
+        </div>
+      </div>
+
+      {/* Reviews Section */}
+      <div className="mb-12">
+        <h2 className="text-2xl font-bold mb-6">Reviews</h2>
+
+        {user ? (
+          <form onSubmit={handleReviewSubmit} className="mb-8">
+            <div className="flex items-center gap-2 mb-4">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
                   key={star}
                   type="button"
+                  onClick={() => setNewRating(star)}
                   className={`text-2xl ${
-                    star <= (hover || rating) ? "text-yellow-500" : "text-gray-400"
+                    star <= newRating ? "text-yellow-400" : "text-gray-300"
                   }`}
-                  onClick={() => setRating(star)}
-                  onMouseEnter={() => setHover(star)}
-                  onMouseLeave={() => setHover(0)}
                 >
                   ★
                 </button>
               ))}
             </div>
-          </div>
+            <textarea
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder="Leave a comment (optional)"
+              className="w-full p-3 border rounded-lg mb-4"
+              rows="3"
+            />
+            <button
+              type="submit"
+              className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              disabled={submittingReview}
+            >
+              {submittingReview ? "Submitting..." : "Submit Review"}
+            </button>
+          </form>
+        ) : (
+          <p>
+            Please <a href="/login" className="text-blue-600">log in</a> to submit a review.
+          </p>
+        )}
 
-          {/* Add to Cart Button */}
-          <button
-            onClick={() => addToCart({ ...product, quantity: 1 })}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          >
-            Add to Cart
-          </button>
+        <div className="space-y-6">
+          {reviews.length === 0 ? (
+            <p>No reviews yet. Be the first!</p>
+          ) : (
+            reviews.map((review) => (
+              <div key={review._id} className="border p-4 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  {[...Array(review.rating)].map((_, i) => (
+                    <span key={i} className="text-yellow-400">★</span>
+                  ))}
+                </div>
+                <p className="text-gray-700 mb-2">{review.comment}</p>
+                <p className="text-sm text-gray-500">by {review.userName}</p>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
-      {/* Comments Section */}
-      <div className="mt-12">
-        <h3 className="text-xl font-bold text-gray-800 mb-4">Customer Reviews</h3>
-        <form onSubmit={handleCommentSubmit} className="mb-6">
-          <textarea
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            placeholder="Write your review here..."
-            className="w-full p-3 border rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <button
-            type="submit"
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          >
-            Submit Review
-          </button>
-        </form>
-
-        {comments.length > 0 ? (
-          <ul className="space-y-4">
-            {comments.map((comment, index) => (
-              <li key={index} className="border rounded-lg p-4 bg-gray-100">
-                <p className="text-gray-800">{comment.comment}</p>
-                <p className="text-sm text-yellow-500">
-                  {"★".repeat(comment.rating)}{" "}
-                  <span className="text-gray-500">({comment.rating} stars)</span>
-                </p>
-                <p className="text-sm text-gray-600">- {comment.userName}</p>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-gray-500">No reviews yet. Be the first to review!</p>
-        )}
-      </div>
-
       {/* Suggested Products */}
-      <SuggestedProducts products={suggestedProducts} />
+      {suggestedProducts.length > 0 && (
+        <div className="mt-12">
+          <h2 className="text-2xl font-bold mb-6">You might also like</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {suggestedProducts.map((suggested) => (
+              <Link to={`/products/${suggested._id}`} key={suggested._id}>
+                <div className="border rounded-lg p-4 hover:shadow-md transition">
+                  <img
+                    src={
+                      suggested.image ||
+                      "https://via.placeholder.com/300x300?text=Image+Not+Available"
+                    }
+                    alt={suggested.name}
+                    className="w-full h-48 object-contain mb-4"
+                  />
+                  <h3 className="font-semibold mb-2">{suggested.name}</h3>
+                  <p className="text-blue-600 font-medium mb-3">
+                    ${suggested.price?.toFixed(2)}
+                  </p>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleAddToCart(suggested);
+                    }}
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  >
+                    Add to Cart
+                  </button>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

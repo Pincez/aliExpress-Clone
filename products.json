@@ -1,0 +1,202 @@
+[
+  {
+    "name": "Wireless Bluetooth Headphones",
+    "description": "High-fidelity wireless sound with noise cancellation.",
+    "category": "Electronics",
+    "subcategory": "Headphones",
+    "price": 89.99,
+    "image": "https://mega.nz/file/ST4RUI5T#9UZBslYA1c2WfimaoErdudftVFGPfs09_CbLKLbhqpM",
+    "stock": 15,
+    "rating": 4.5
+  },
+  {
+    "name": "Smart Fitness Watch",
+    "description": "Track your workouts and health metrics in real-time.",
+    "category": "Electronics",
+    "subcategory": "Smartwatches",
+    "price": 129.99,
+    "image": "https://mega.nz/file/DORnSaAT#WyVSQjaeM1kSuv1NoOMt0z1ohDGCEpSJWoLj1AN_94A",
+    "stock": 20,
+    "rating": 4.3
+  },
+  {
+    "name": "Wooden Toy Train Set",
+    "description": "Educational and fun toy for young kids.",
+    "category": "Toys & Games",
+    "subcategory": "Toys",
+    "price": 24.5,
+    "image": "https://mega.nz/file/Da4A2QjS#pSRvuItnt0CxmTCZda1jqeOLSGXgw3C4VnGVYEp3z7k",
+    "stock": 50,
+    "rating": 4.8
+  },
+  {
+    "name": "Electric Standing Desk",
+    "description": "Adjustable height desk for ergonomic office setups.",
+    "category": "Electronics",
+    "subcategory": "Furniture",
+    "price": 349.99,
+    "image": "https://mega.nz/file/OHYmEQwC#gY5WFrzdR4ToCQRLI4e6x0z5E_7RjXl6RLegbXWLUmk",
+    "stock": 5,
+    "rating": 4.7
+  },
+  {
+    "name": "Organic Vitamin C Serum",
+    "description": "Brighten and hydrate your skin with natural ingredients.",
+    "category": "Beauty & Health",
+    "subcategory": "Health",
+    "price": 19.99,
+    "image": "https://mega.nz/file/WPgWCAIK#zF28P1Z995-ANiG30u_jrHu0qGJk3DiXSjNwO6F4_l4",
+    "stock": 30,
+    "rating": 4.6
+  },
+  {
+    "name": "Adventure Novel - The Lost Island",
+    "description": "A thrilling tale of exploration and survival.",
+    "category": "Books",
+    "subcategory": "Books",
+    "price": 12.99,
+    "image": "https://mega.nz/file/GWR3VD5b#ZQlIkLLF77WRVwDwdd6kmyLcQrNlnbXJS1FEgi1kxlE",
+    "stock": 25,
+    "rating": 4.2
+  },
+  {
+    "name": "Men's Running Shoes",
+    "description": "Lightweight and breathable with a comfortable fit.",
+    "category": "Clothing",
+    "subcategory": "Clothing",
+    "price": 59.99,
+    "image": "https://mega.nz/file/DToEgDhQ#PUwMXntRoQZmYGh8uuDcf19FyhrjBDRr3S36SjQ1cyQ",
+    "stock": 18,
+    "rating": 4.4
+  },
+  {
+    "name": "Children's Fairy Tale Book",
+    "description": "Beautifully illustrated bedtime stories.",
+    "category": "Books",
+    "subcategory": "Books",
+    "price": 8.5,
+    "image": "https://mega.nz/file/yW4m1bhC#_Et-XApGvIYcfFa6oarXl5hbMGdT_yuHSKAa0hU-QmQ",
+    "stock": 40,
+    "rating": 4.9
+  },
+  {
+    "name": "Bluetooth Party Speaker",
+    "description": "Powerful bass and colorful LED lights.",
+    "category": "Electronics",
+    "subcategory": "Speakers",
+    "price": 74.99,
+    "image": "https://mega.nz/file/WKhW3BzD#U2jDeMFFzv063kZfCwS1GbIXZoJmjNHMmXbq2BK8fNc",
+    "stock": 12,
+    "rating": 4.1
+  },
+  {
+    "name": "Makeup Brush Set",
+    "description": "Professional 12-piece brush set.",
+    "category": "Beauty & Health",
+    "subcategory": "Health",
+    "price": 15.99,
+    "image": "https://mega.nz/file/DDoU0RSK#VIxSZ9klwrFNPdeUxzhC860NDi-rLSGYz5LLkvYpDw0",
+    "stock": 45,
+    "rating": 4.5
+  },
+  {
+    "name": "Kids Dinosaur Puzzle",
+    "description": "Fun and educational 3D puzzle.",
+    "category": "Toys & Games",
+    "subcategory": "Toys",
+    "price": 14.99,
+    "image": "https://mega.nz/file/nK5w0SwZ#GjhSK7rgoo3baR5clhzHfK6BD4SLBVIW0sSbb7dfvsA",
+    "stock": 60,
+    "rating": 4.6
+  },
+  {
+    "name": "Men's Leather Jacket",
+    "description": "Classic style with durable leather finish.",
+    "category": "Clothing",
+    "subcategory": "Clothing",
+    "price": 109.99,
+    "image": "https://mega.nz/file/jGRwRQAb#CccDVgMp14Ym6Cn9iMEnNydlWqYV09v8EuWF2_16SjQ",
+    "stock": 10,
+    "rating": 4.3
+  },
+  {
+    "name": "Wireless Smart Doorbell",
+    "description": "HD camera with motion detection and 2-way audio.",
+    "category": "Electronics",
+    "subcategory": "Smartwatches",
+    "price": 59.99,
+    "image": "https://mega.nz/file/mOgSFAoa#c84pRYFc-SJb47_zx0eDb77PcE9TIUBCp5aJExT79Ok",
+    "stock": 7,
+    "rating": 4.0
+  },
+  {
+    "name": "Self-Help Book - Mindset Mastery",
+    "description": "Unlock the power of a growth mindset.",
+    "category": "Books",
+    "subcategory": "Books",
+    "price": 10.99,
+    "image": "https://mega.nz/file/WLRjTQZL#mE4lqvxgTy7ejspSbFBUutBlCou0pYog_GbhfAGWMxQ",
+    "stock": 35,
+    "rating": 4.7
+  },
+  {
+    "name": "Women's Summer Dress",
+    "description": "Lightweight floral dress perfect for warm weather.",
+    "category": "Clothing",
+    "subcategory": "Clothing",
+    "price": 39.99,
+    "image": "https://mega.nz/file/GGwT3Aha#7kiqU2uk1qsc6EISd98BMOIM45s9_B_VgzCTM-zCtC4",
+    "stock": 28,
+    "rating": 4.4
+  },
+  {
+    "name": "Smart Speaker with Voice Assistant",
+    "description": "Control your smart home and stream music.",
+    "category": "Electronics",
+    "subcategory": "Speakers",
+    "price": 49.99,
+    "image": "https://mega.nz/file/7aYggJxJ#nxnUUft_1Tlxhb7IHcR0y-g1svYcSAuVO6PkxE7BjPQ",
+    "stock": 14,
+    "rating": 4.2
+  },
+  {
+    "name": "Organic Shampoo & Conditioner Set",
+    "description": "Sulfate-free and safe for all hair types.",
+    "category": "Beauty & Health",
+    "subcategory": "Health",
+    "price": 22.5,
+    "image": "https://mega.nz/file/zagnAIba#FNmBQ4vckDJQ-njn5nMbQpTQErXyZAvoGzksseS6L70",
+    "stock": 33,
+    "rating": 4.6
+  },
+  {
+    "name": "Creative Building Blocks",
+    "description": "Boost your child’s creativity and motor skills.",
+    "category": "Toys & Games",
+    "subcategory": "Toys",
+    "price": 18.99,
+    "image": "https://mega.nz/file/bLQhBTxa#Und6IYxl2W2sIXcFGNN5K2_wcHiHDNvAGNdoM4qVDos",
+    "stock": 70,
+    "rating": 4.8
+  },
+  {
+    "name": "Kids Story Book Collection",
+    "description": "Five best-selling bedtime stories in one.",
+    "category": "Books",
+    "subcategory": "Books",
+    "price": 21.99,
+    "image": "https://mega.nz/file/2WIEgJjT#H14ESan6URtruz5RVoTczvsQFqFUtLOwhAYBlLWfpto",
+    "stock": 50,
+    "rating": 4.9
+  },
+  {
+    "name": "Classic Wireless Earbuds",
+    "description": "Comfort fit with long-lasting battery life.",
+    "category": "Electronics",
+    "subcategory": "Headphones",
+    "price": 64.75,
+    "image": "https://mega.nz/file/WT5EkQ5B#BVUBZO67b7sfU_QpM_YHC86awNo2Kx3v0IXo596Zd6E",
+    "stock": 23,
+    "rating": 4.3
+  }
+]
